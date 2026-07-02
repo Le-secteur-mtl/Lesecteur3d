@@ -1,0 +1,75 @@
+import type { Locale } from './types';
+
+type Dict = Record<string, string>;
+export const dictionaries: Record<Locale, Dict> = {
+  fr: {
+    app: 'mon-budget',
+    subtitle: 'Directeur financier personnel IA',
+    loginTitle: 'Connecte-toi pour protéger tes données',
+    loginText: 'Chaque utilisateur possède son propre espace sécurisé et synchronisé.',
+    google: 'Connexion Google',
+    signOut: 'Déconnexion',
+    dashboard: 'Tableau de bord',
+    budget: 'Budget',
+    calendar: 'Calendrier',
+    debts: 'Dettes',
+    ai: 'IA',
+    settings: 'Réglages',
+    onboardingTitle: 'Créons ton budget de départ',
+    onboardingText: 'Réponds rapidement aux questions. Tu pourras tout modifier ensuite.',
+    monthlyIncome: 'Revenu net mensuel estimé',
+    minimumBuffer: 'Coussin minimum',
+    save: 'Sauvegarder',
+    availableToday: 'Disponible aujourd’hui',
+    reserved: 'Réservé aux paiements',
+    trueSurplus: 'Vrai surplus',
+    debtTotal: 'Dettes totales',
+    risk: 'Risque',
+    upcoming: 'Prochains paiements',
+    addIncome: 'Ajouter entrée',
+    addExpense: 'Ajouter sortie',
+    ask: 'Demander à l’IA',
+    questionPlaceholder: 'Ex. Est-ce que je peux mettre 500 $ sur la CIBC ?',
+    protected: 'Protégé par connexion utilisateur',
+    language: 'Langue',
+    french: 'Français',
+    english: 'Anglais'
+  },
+  en: {
+    app: 'mon-budget',
+    subtitle: 'AI personal CFO',
+    loginTitle: 'Sign in to protect your data',
+    loginText: 'Each user gets a private synced workspace.',
+    google: 'Sign in with Google',
+    signOut: 'Sign out',
+    dashboard: 'Dashboard',
+    budget: 'Budget',
+    calendar: 'Calendar',
+    debts: 'Debts',
+    ai: 'AI',
+    settings: 'Settings',
+    onboardingTitle: 'Let’s create your starting budget',
+    onboardingText: 'Answer quickly. You can edit everything later.',
+    monthlyIncome: 'Estimated monthly net income',
+    minimumBuffer: 'Minimum buffer',
+    save: 'Save',
+    availableToday: 'Available today',
+    reserved: 'Reserved for payments',
+    trueSurplus: 'True surplus',
+    debtTotal: 'Total debt',
+    risk: 'Risk',
+    upcoming: 'Upcoming payments',
+    addIncome: 'Add income',
+    addExpense: 'Add expense',
+    ask: 'Ask AI',
+    questionPlaceholder: 'Ex. Can I put $500 on my CIBC card?',
+    protected: 'Protected by user login',
+    language: 'Language',
+    french: 'French',
+    english: 'English'
+  }
+};
+
+export function t(locale: Locale, key: string) {
+  return dictionaries[locale][key] ?? key;
+}

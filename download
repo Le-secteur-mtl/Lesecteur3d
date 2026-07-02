@@ -1,0 +1,41 @@
+'use client';
+
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth';
+import { getFirestore, doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
+import type { AppData } from './types';
+
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyBztvkuRNuajINJSwVbLc4xnIu2TxkTwvQ',
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'mon-budget-local.firebaseapp.com',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'mon-budget-local',
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'mon-budget-local.firebasestorage.app',
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '138032174899',
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:138032174899:web:85813623fa22faf8095046',
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-N9DFWB52JD'
+};
+
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const provider = new GoogleAuthProvider();
+
+export async function loginWithGoogle() {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (error) {
+    await signInWithRedirect(auth, provider);
+  }
+}
+
+export async function logout() {
+  await signOut(auth);
+}
+
+export function watchUserData(uid: string, callback: (data: AppData | null) => void) {
+  return onSnapshot(doc(db, 'users', uid, 'private', 'appData'), (snap) => callback((snap.data() as AppData) ?? null));
+}
+
+export async function saveUserData(uid: string, data: AppData) {
+  await setDoc(doc(db, 'users', uid, 'private', 'appData'), { ...data, updatedAt: new Date().toISOString(), serverUpdatedAt: serverTimestamp() }, { merge: true });
+}

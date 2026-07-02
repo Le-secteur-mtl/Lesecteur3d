@@ -1,0 +1,42 @@
+export type Locale = 'fr' | 'en';
+export type TransactionType = 'income' | 'expense';
+
+export type BudgetItem = {
+  id: string;
+  date: string;
+  label: string;
+  category: string;
+  type: TransactionType;
+  planned: number;
+  actual?: number;
+  paid?: boolean;
+  recurring?: 'weekly' | 'biweekly' | 'monthly' | 'none';
+};
+
+export type Debt = {
+  id: string;
+  name: string;
+  balance: number;
+  rate: number;
+  minimum: number;
+  dueDay: number;
+};
+
+export type Profile = {
+  displayName: string;
+  email: string;
+  currency: string;
+  minimumBuffer: number;
+  paydayFrequency: 'weekly' | 'biweekly' | 'monthly';
+  paydayLabel: string;
+  onboardingComplete: boolean;
+  language: Locale;
+};
+
+export type AppData = {
+  profile: Profile;
+  items: BudgetItem[];
+  debts: Debt[];
+  actualBalances: { date: string; balance: number; note?: string }[];
+  updatedAt: string;
+};

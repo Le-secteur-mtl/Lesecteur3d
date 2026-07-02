@@ -1,0 +1,63 @@
+import type { AppData, BudgetItem } from './types';
+
+export const currency = (n: number, locale = 'fr-CA') =>
+  new Intl.NumberFormat(locale, { style: 'currency', currency: 'CAD' }).format(n || 0);
+
+export const monthKey = (date = new Date()) => date.toISOString().slice(0, 7);
+export const itemAmount = (item: BudgetItem) => item.actual ?? item.planned;
+
+export function itemsForMonth(items: BudgetItem[], month: string) {
+  return items.filter((i) => i.date.startsWith(month));
+}
+
+export function totalsForMonth(data: AppData, month: string) {
+  const monthItems = itemsForMonth(data.items, month);
+  const income = monthItems.filter((i) => i.type === 'income').reduce((s, i) => s + itemAmount(i), 0);
+  const expenses = monthItems.filter((i) => i.type === 'expense').reduce((s, i) => s + itemAmount(i), 0);
+  const debtTotal = data.debts.reduce((s, d) => s + d.balance, 0);
+  const nextMonth = nextMonthKey(month);
+  const nextMonthFirstHalfExpenses = data.items
+    .filter((i) => i.type === 'expense' && i.date.startsWith(nextMonth) && Number(i.date.slice(8, 10)) <= 15)
+    .reduce((s, i) => s + itemAmount(i), 0);
+  const lastBalance = data.actualBalances.at(-1)?.balance ?? 0;
+  const reserved = monthItems.filter((i) => i.type === 'expense' && !i.paid).reduce((s, i) => s + itemAmount(i), 0);
+  const availableToday = lastBalance - reserved;
+  const trueSurplus = income - expenses - data.profile.minimumBuffer - nextMonthFirstHalfExpenses;
+  const risk = availableToday < 0 ? 'high' : availableToday < data.profile.minimumBuffer ? 'medium' : 'low';
+  return { income, expenses, debtTotal, nextMonthFirstHalfExpenses, lastBalance, reserved, availableToday, trueSurplus, risk };
+}
+
+export function nextMonthKey(month: string) {
+  const [y, m] = month.split('-').map(Number);
+  const d = new Date(y, m, 1);
+  return d.toISOString().slice(0, 7);
+}
+
+export function seedData(email: string, displayName = 'Utilisateur'): AppData {
+  const now = new Date().toISOString();
+  const y = new Date().getFullYear();
+  const m = String(new Date().getMonth() + 1).padStart(2, '0');
+  const month = `${y}-${m}`;
+  const item = (day: string, label: string, category: string, type: 'income' | 'expense', planned: number): BudgetItem => ({
+    id: crypto.randomUUID(), date: `${month}-${day}`, label, category, type, planned, recurring: 'monthly', paid: false
+  });
+  return {
+    profile: { displayName, email, currency: 'CAD', minimumBuffer: 500, paydayFrequency: 'weekly', paydayLabel: 'Chaque jeudi', onboardingComplete: false, language: 'fr' },
+    items: [
+      item('02', 'Paie', 'Revenu', 'income', 1025),
+      item('05', 'Carte CIBC', 'Dette', 'expense', 321),
+      item('10', 'Ligne de crédit', 'Dette', 'expense', 78.14),
+      item('12', 'Téléphone', 'Télécommunication', 'expense', 75),
+      item('25', 'Hypothèque', 'Logement', 'expense', 915),
+      item('26', 'Assurance habitation', 'Assurance', 'expense', 98),
+      item('28', 'Netflix', 'Abonnement', 'expense', 9.19)
+    ],
+    debts: [
+      { id: crypto.randomUUID(), name: 'Carte CIBC', balance: 7000, rate: 26, minimum: 321, dueDay: 5 },
+      { id: crypto.randomUUID(), name: 'Carte Scotia', balance: 4000, rate: 13.99, minimum: 192, dueDay: 22 },
+      { id: crypto.randomUUID(), name: 'Prêt auto', balance: 16000, rate: 7.79, minimum: 167, dueDay: 4 }
+    ],
+    actualBalances: [{ date: now.slice(0,10), balance: 0, note: 'Solde initial' }],
+    updatedAt: now
+  };
+}
